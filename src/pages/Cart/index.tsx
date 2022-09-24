@@ -21,7 +21,6 @@ const Cart = (): JSX.Element => {
    const { cart, removeProduct, updateProductAmount } = useCart();
 
    const cartFormatted = cart.map(product => ({
-      // TODO
       ...product,
       priceFormatted: formatPrice(product.price),
       subtotal: formatPrice(product.price * product.amount)
@@ -30,27 +29,27 @@ const Cart = (): JSX.Element => {
    const total =
      formatPrice(
        cart.reduce((sumTotal, product) => {
-          // TODO
           return sumTotal + product.price * product.amount;
        }, 0)
      )
 
   function handleProductIncrement(product: Product) {
-    // TODO
+
     const productId = product.id;
 
     updateProductAmount({ productId, amount: product.amount + 1 });
   }
 
   function handleProductDecrement(product: Product) {
-    // TODO
-    console.log("FUNCAO DECREMENTO ACIONADA!!! ")
+
     const productId = product.id;
-    updateProductAmount({ productId, amount: product.amount - 1 })
+
+    updateProductAmount({ productId, amount: product.amount - 1 });
+
   }
 
   function handleRemoveProduct(productId: number) {
-    // TODO
+
     removeProduct(productId);
   }
 
