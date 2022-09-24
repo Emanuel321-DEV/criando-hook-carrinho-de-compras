@@ -116,7 +116,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       }
 
       // TODO 
-       if(findProductInCart.amount < 1){
+       if(amount < 1){
         return;
       } 
 
@@ -144,7 +144,8 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
     } catch {
       // TODO
-      toast.error('Erro na alteração de quantidade do produto ')
+      toast.error('Erro na alteração de quantidade do produto')
+      return;
     }
   };
 
