@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
-import { Product } from '../types';
+import { Product, Stock } from '../types';
 
 interface CartProviderProps {
   children: ReactNode;
@@ -23,7 +23,9 @@ const CartContext = createContext<CartContextData>({} as CartContextData);
 
 export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const [cart, setCart] = useState<Product[]>(() => {
-    const storagedCart = localStorage.getItem("@RocketShoes:cart")
+    
+    // Busca no local Storage um item com o nome @RocketShoes:cart
+    const storagedCart = localStorage.getItem("@RocketShoes:cart");
 
     if (storagedCart) {
       return JSON.parse(storagedCart);
@@ -32,69 +34,74 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     return [];
   });
 
+  // Responsavel por add um produto ao carrinho
   const addProduct = async (productId: number) => {
     try {
       // TODO
-      const productIsOnCart = cart.find(product => product.id === productId);
+      const productIsOnCart = cart.find(product => product.id === productId); // verifica se o produto está no carrinho
 
-      const getStock = await api.get(`/stock/${productId}`);
-      const stock = await getStock.data.amount;
-
-      const stockIsInsuficient = productIsOnCart ? stock - (productIsOnCart.amount + 1) < 0 : stock.amount - 1 < 0;
+      const getStock = await api.get(`/stock/${productId}`); // Busca o estoque de um produto pelo ID
+      const stock: Stock = await getStock.data;
+      const stockIsInsuficient = productIsOnCart ? stock.amount - (productIsOnCart.amount + 1) < 0 : stock.amount - 1 < 0;
 
       if (stockIsInsuficient) {
         toast.error("Quantidade solicitada fora de estoque");
         return;
       }
-
-      const getProduct = await api.get(`products/${productId}`);
-      const product = await getProduct.data;
-
+      
       if (productIsOnCart) {
-
+        
+        // Percorre cada produto no carrinho, se o ID do produto bater com o ID informado nos parametros da função, então a propriedade amount(quantidade) desse produto terá seu valor incrementado em 1.
         const incrementProductInCart = cart.map(productItem => productItem.id === productId ? {
           ...productItem,
           amount: productItem.amount + 1
         } : productItem)
 
+        // Atualiza o valor do carrinho
         setCart(incrementProductInCart);
-
+        
+        // Salva as mudanças feitas no localStorage
         localStorage.setItem("@RocketShoes:cart", JSON.stringify(incrementProductInCart));
-
+        
       } else {
-
+        
+        const getProduct = await api.get(`/products/${productId}`); // Busca um produto na api pelo ID
+        const product = await getProduct.data;
+        
         Object.assign(product, {
           amount: 1
-        })
+        }); // Adiciona a propriedade amount no produto com valor 1. 
 
-        setCart([...cart, product])
+        setCart([...cart, product]); // atualiza o valor do carrinho
 
-        localStorage.setItem("@RocketShoes:cart", JSON.stringify([...cart, product]))
+        localStorage.setItem("@RocketShoes:cart", JSON.stringify([...cart, product])); // Salva as mudanças feitas no localStorage
 
       }
 
     } catch {
-      // TODO
+      
       toast.error("Erro na adição do produto");
 
       return;
     }
   };
 
+  // Responsável por remover um produto do carrinho
   const removeProduct = (productId: number) => {
     try {
-      // TODO
-      const productIsOnCart = cart.some(product => product.id === productId);
+
+      const productIsOnCart = cart.some(product => product.id === productId); // Verifica se esse produto de fato está no carrinho.
 
       if (productIsOnCart === false) {
         throw new Error();
       }
 
+      // Pega os produtos do carrinho e faz um filtro, nesse filtro, só passa os produtos com ID diferente do ID informado nos parametros da rota. Dessa forma, o produto é removido. 
       const cartUpdated = cart.filter(productInCart => productInCart.id !== productId);
 
-      setCart(cartUpdated);
+      setCart(cartUpdated); // Atualiza o valor do carrinho
 
-      localStorage.setItem("@RocketShoes:cart", JSON.stringify(cartUpdated));
+      localStorage.setItem("@RocketShoes:cart", JSON.stringify(cartUpdated)); // Salva as mudanças no localStorage
 
     } catch {
       // TODO
@@ -103,15 +110,16 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
     }
   };
 
+  // Atualiza o valor de um produto no carrinho.
   const updateProductAmount = async ({
-    productId,
-    amount,
+    productId, // ID do produto
+    amount,   // Quantidade que JÁ ESTÁ NO CARRINHO +1(Pra incremento) ou -1(Pra decremento).
   }: UpdateProductAmount) => {
     try {
 
-      const findProductInCart = cart.some(product => product.id === productId);
+      const productIsOnCart = cart.some(product => product.id === productId); // Verifica se o produto está de fato no carrinho
 
-      if (!findProductInCart) {
+      if (productIsOnCart === false) {
         throw new Error();
       }
 
@@ -119,7 +127,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         return;
       }
 
-      const findStock = await api.get(`stock/${productId}`)
+      const findStock = await api.get(`stock/${productId}`); // Busca o estoque de um produto pelo ID
       const stock = findStock.data.amount;
       const stockIsInsuficient = stock - amount < 0;
 
@@ -128,10 +136,11 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         return;
       }
 
+      // Percorre cada produto no carrinho, se o ID do produto bater com o ID informado nos parametros da função, então a propriedade amount(quantidade) desse produto terá seu valor atualizado com o amount presente nos parametros da função.
       const updateProductAmount = cart.map(productItem => (
         productItem.id === productId ? {
         ...productItem,
-        amount,
+        amount: amount
       } : productItem));
 
 
@@ -141,8 +150,9 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
 
     } catch {
-      // TODO
+
       toast.error('Erro na alteração de quantidade do produto');
+
       return;
     }
   };

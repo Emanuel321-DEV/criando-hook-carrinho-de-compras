@@ -25,6 +25,8 @@ const Home = (): JSX.Element => {
    const [ products, setProducts ] = useState<ProductFormatted[]>([]);
    const { addProduct, cart } = useCart();
 
+   // Devolve cada produto com seu id e a respectiva quantidade desse produto no carrinho;
+   // Ex =>  1: 4   ==> Isso significa que o produto com id 1 está com 4 elementos no carrinho
    const cartItemsAmount = cart.reduce((sumAmount, product) => {
       const key = product.id;
       const productAmount = product.amount;
@@ -39,9 +41,10 @@ const Home = (): JSX.Element => {
   useEffect(() => {
     async function loadProducts() {
       // TODO
-      const findProducts = await api.get("/products");
+      const findProducts = await api.get("/products"); // Busca os produtos na api
       const allProducts: Product[] = await findProducts.data;
-
+    
+      // Percorre cada produto retornado pela api e adiciona a propriedade preçoFormatado
       const productsFormatted: ProductFormatted[] = allProducts.map(product => {
         return {
           ...product,
@@ -56,6 +59,7 @@ const Home = (): JSX.Element => {
     loadProducts();
   }, []);
 
+  // Adiciona um produto ao carrinho
   function handleAddProduct(id: number) {
     // TODO
     addProduct(id);

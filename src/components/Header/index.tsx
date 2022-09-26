@@ -8,7 +8,7 @@ import { useCart } from '../../hooks/useCart';
 
 const Header = (): JSX.Element => {
    const { cart } = useCart();
-   const cartSize = cart.length;
+   const cartSize = cart.length; // Verifica a quantiade de produtos distintos no carrinho
 
   return (
     <Container>

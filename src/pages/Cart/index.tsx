@@ -20,19 +20,22 @@ interface Product {
 const Cart = (): JSX.Element => {
    const { cart, removeProduct, updateProductAmount } = useCart();
 
+   // Percorre cada produto no carrinho, adicionando as propriedades 'preço formatado' e subtotal(Preço x Quantidade desse produto) 
    const cartFormatted = cart.map(product => ({
       ...product,
       priceFormatted: formatPrice(product.price),
       subtotal: formatPrice(product.price * product.amount)
-   }))
+   }));
 
+   // Percorre todos os produtos do carrinho, e no fim das contas devolve o valor total (Todos os preços somados)
    const total =
      formatPrice(
        cart.reduce((sumTotal, product) => {
           return sumTotal + product.price * product.amount;
        }, 0)
-     )
+     );
 
+  // Incrementa um produto no carrinho
   function handleProductIncrement(product: Product) {
 
     const productId = product.id;
@@ -40,6 +43,7 @@ const Cart = (): JSX.Element => {
     updateProductAmount({ productId, amount: product.amount + 1 });
   }
 
+  // Decrementa um produto no carrinho
   function handleProductDecrement(product: Product) {
 
     const productId = product.id;
@@ -48,8 +52,8 @@ const Cart = (): JSX.Element => {
 
   }
 
+  // Remove um produto do carrinho
   function handleRemoveProduct(productId: number) {
-
     removeProduct(productId);
   }
 
