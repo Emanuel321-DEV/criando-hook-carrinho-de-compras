@@ -2,7 +2,7 @@
 
 
 <p align="center">
-    <img width="100%" src="./public/video-criando-hook-carrinho-de-compras.gif"/>
+    <img width="500" src="./public/video-criando-hook-carrinho-de-compras.gif"/>
 </p>
 
 
